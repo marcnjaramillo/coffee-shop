@@ -16,7 +16,7 @@ export class DrinkMenuPage implements OnInit {
     private auth: AuthService,
     private modalCtrl: ModalController,
     public drinks: DrinksService
-    ) { }
+  ) { }
 
   ngOnInit() {
     this.drinks.getDrinks();
