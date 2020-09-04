@@ -12,18 +12,12 @@ setup_db(app)
 CORS(app)
 
 
-class AuthError(Exception):
-    def __init__(self, error, status_code):
-        self.error = error
-        self.status_code = status_code
-
-
 '''
 @TODO uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 
@@ -44,7 +38,7 @@ def get_drinks():
 
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
-def get_drinks(payload):
+def get_drinks_detail(payload):
     all_drinks = Drink.query.all()
     drinks = [drink.long() for drink in all_drinks]
 
@@ -134,7 +128,7 @@ def unprocessable(error):
 
 
 @app.errorhandler(404)
-def unprocessable(error):
+def not_found(error):
     return jsonify({
         "success": False,
         "error": 404,
