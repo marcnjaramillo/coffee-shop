@@ -36,9 +36,9 @@ def get_drinks():
     })
 
 
-@app.route('/drinks-detail', methods=['GET'])
-@requires_auth('get:drinks-detail')
-def get_drinks_detail(payload):
+@app.route('/drink-details', methods=['GET'])
+@requires_auth('get:drink-details')
+def get_drinks_detail(token):
     all_drinks = Drink.query.all()
     drinks = [drink.long() for drink in all_drinks]
 
@@ -53,7 +53,7 @@ def get_drinks_detail(payload):
 
 @app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
-def create_drink(payload):
+def create_drink(token):
     body = request.get_json()
     title = body.get('title')
     recipe = body.get('recipe')
@@ -81,13 +81,15 @@ def update_drink(payload, id):
 
     try:
         body = request.get_json()
-        drink.title = body.get('title', drink.title)
+        drink.title = json.dumps(body.get('title', drink.title))
         drink.recipe = json.dumps(body.get('recipe'))
         drink.update()
 
+        updated_drink = Drink.query.filter_by(id=id).first()
+
         return jsonify({
             'success': True,
-            'drinks': drink.long()
+            'drinks': [updated_drink.long()]
         })
     except Exception as e:
         print(e)
@@ -96,7 +98,7 @@ def update_drink(payload, id):
 
 @app.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
-def delete_drink(payload, id):
+def delete_drink(token, id):
     try:
         drink = Drink.query.filter(
             Drink.id == id).one_or_none()
@@ -116,6 +118,13 @@ def delete_drink(payload, id):
         abort(422)
 
 # Error Handling
+
+
+@app.errorhandler(AuthError)
+def handle_auth_error(ex):
+    response = jsonify(ex.error)
+    response.status_code = ex.status_code
+    return response
 
 
 @app.errorhandler(422)
